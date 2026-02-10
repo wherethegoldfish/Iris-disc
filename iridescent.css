@@ -1,0 +1,166 @@
+/* iridescent.css
+   Drop-in iridescent accent module for BetterDiscord/ClearVision.
+*/
+
+/* =========================
+   1) CUSTOMIZE YOUR IRIS
+   ========================= */
+:root{
+  /* Color stops (purple/pink iridescence) */
+  --iris-c1: #580ce6; /* deep purple */
+  --iris-c2: #7a2cff; /* violet */
+  --iris-c3: #b8186d; /* magenta */
+  --iris-c4: #ff4fd8; /* hot pink */
+  --iris-c5: #580ce6; /* loop back */
+
+  /* Animation / sizing */
+  --iris-angle: 135deg;
+  --iris-size: 320% 320%;
+  --iris-speed: 9s;
+
+  /* Border + glow */
+  --iris-border-width: 2px;
+  --iris-glow: 0 0 14px rgba(88, 12, 230, 0.35);
+
+  /* Text on top of gradient */
+  --iris-text: #fff;
+}
+
+:root{
+  --iris-gradient: linear-gradient(var(--iris-angle),
+    var(--iris-c1) 0%,
+    var(--iris-c2) 25%,
+    var(--iris-c3) 50%,
+    var(--iris-c4) 75%,
+    var(--iris-c5) 100%
+  );
+}
+
+/* Smooth animated “sheen” */
+@keyframes irisShift {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce){
+  * { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; }
+}
+
+/* =========================
+   2) BUTTONS (FILLED + OUTLINE)
+   Uses stable-ish “lookFilled/lookOutlined” substrings Discord ships in classnames.
+   ========================= */
+
+/* Filled buttons */
+:is(button,[role="button"])[class*="lookFilled"]{
+  background: var(--iris-gradient) !important;
+  background-size: var(--iris-size) !important;
+  background-position: 0% 50% !important;
+  color: var(--iris-text) !important;
+  box-shadow: var(--iris-glow) !important;
+}
+
+/* Outlined buttons (gradient border, transparent inside) */
+:is(button,[role="button"])[class*="lookOutlined"]{
+  border: var(--iris-border-width) solid transparent !important;
+  background:
+    linear-gradient(transparent, transparent) padding-box,
+    var(--iris-gradient) border-box !important;
+  background-size: var(--iris-size) !important;
+  background-position: 0% 50%, 0% 50% !important;
+  color: var(--iris-text) !important;
+  box-shadow: var(--iris-glow) !important;
+}
+
+/* Animate buttons (only if user allows motion) */
+@media (prefers-reduced-motion: no-preference){
+  :is(button,[role="button"])[class*="lookFilled"],
+  :is(button,[role="button"])[class*="lookOutlined"]{
+    animation: irisShift var(--iris-speed) ease infinite !important;
+  }
+}
+
+/* Hover polish */
+:is(button,[role="button"])[class*="lookFilled"]:hover,
+:is(button,[role="button"])[class*="lookOutlined"]:hover{
+  filter: saturate(1.15) brightness(1.05);
+}
+
+/* Keyboard focus ring (solid fallback; gradients can’t be used directly as outline-color) */
+:is(button,[role="button"]):focus-visible{
+  outline: 2px solid var(--iris-c2) !important;
+  outline-offset: 2px;
+}
+
+/* =========================
+   3) SELECTED CHANNEL / SELECTED TAB ACCENTS
+   Uses aria-selected for “selected” state. :contentReference[oaicite:2]{index=2}
+   Uses Discord’s data-list-item-id convention for channels. :contentReference[oaicite:3]{index=3}
+   ========================= */
+
+/* Selected channel: add an iridescent left bar + subtle background */
+a[data-list-item-id^="channels___"][aria-selected="true"]{
+  position: relative;
+  background:
+    linear-gradient(rgba(0,0,0,0.0), rgba(0,0,0,0.0)) padding-box,
+    color-mix(in srgb, var(--iris-c1) 18%, transparent) border-box !important;
+  border-radius: 8px;
+}
+
+/* The “bar” */
+a[data-list-item-id^="channels___"][aria-selected="true"]::before{
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 10%;
+  bottom: 10%;
+  width: 4px;
+  border-radius: 999px;
+  background: var(--iris-gradient);
+  background-size: var(--iris-size);
+  background-position: 0% 50%;
+}
+
+/* Animate the bar */
+@media (prefers-reduced-motion: no-preference){
+  a[data-list-item-id^="channels___"][aria-selected="true"]::before{
+    animation: irisShift var(--iris-speed) ease infinite;
+  }
+}
+
+/* Selected tab (many Discord tab UIs use role="tab") */
+[role="tab"][aria-selected="true"]{
+  position: relative;
+}
+
+[role="tab"][aria-selected="true"]::after{
+  content: "";
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  bottom: -2px;
+  height: 3px;
+  border-radius: 999px;
+  background: var(--iris-gradient);
+  background-size: var(--iris-size);
+  background-position: 0% 50%;
+}
+
+@media (prefers-reduced-motion: no-preference){
+  [role="tab"][aria-selected="true"]::after{
+    animation: irisShift var(--iris-speed) ease infinite;
+  }
+}
+
+/* =========================
+   4) OPTIONAL: “Danger” OUTLINE BORDER TOKENS → YOUR IRIS COLORS
+   (These are Discord CSS vars BetterDiscord documents.) :contentReference[oaicite:4]{index=4}
+   NOTE: these expect colors, not gradients — so we map to iris stops.
+   ========================= */
+:root{
+  --button-outline-danger-border: var(--iris-c2);
+  --button-outline-danger-border-hover: var(--iris-c3);
+  --button-outline-danger-border-active: var(--iris-c4);
+}
