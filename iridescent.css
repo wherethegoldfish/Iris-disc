@@ -1,5 +1,5 @@
 /* iridescent.css — Clean “effects layer” for BetterDiscord/ClearVision
-   Keep this file focused on effects; keep ClearVision variables in your theme.
+   Focused on effects; keep ClearVision variables in your main theme.
 */
 
 /* =========================
@@ -26,9 +26,6 @@
   /* Sheen (optional) */
   --iris-shine-opacity: 0.20;
   --iris-shine-speed: 2.6s;
-
-  /* Server ring */
-  --iris-ring-width: 3px;
 }
 
 :root{
@@ -196,6 +193,7 @@ a[data-list-item-id^="channels___"][aria-selected="true"]::before{
 
 /* =========================
    5) SERVER “PILL” INDICATOR (LEFT BAR)
+   (NOT a ring — just the left selection/unread pill)
    ========================= */
 ul[data-list-id="guildsnav"] [class*="pill"] [class*="item"]{
   background: var(--iris-gradient) !important;
