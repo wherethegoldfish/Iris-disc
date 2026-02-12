@@ -194,90 +194,52 @@ a[data-list-item-id^="channels___"][aria-selected="true"]::before{
   }
 }
 /* =========================
-   5) SERVER ICON RING (CONSISTENT + VISIBLE)
+   5) SERVER ICON RING (WORKS WITH YOUR DOM)
    ========================= */
 
-:where(ul[data-list-id="guildsnav"])
-:is(li, div)[data-list-item-id^="guildsnav___"]
-:is(
-  > div:is([class^="wrapper_"], [class^="childWrapper"]),
-  > div > div:is([class^="wrapper_"], [class^="childWrapper"]),
-  > div > div > div:is([class^="wrapper_"], [class^="childWrapper"])
-){
+:where([data-list-item-id^="guildsnav___"][role="treeitem"])
+:is([class^="wrapper_"], [class^="childWrapper"]) {
   position: relative !important;
   border-radius: inherit !important;
-  isolation: isolate !important;
 }
 
-/* Always-visible subtle ring */
-:where(ul[data-list-id="guildsnav"])
-:is(li, div)[data-list-item-id^="guildsnav___"]
-:is(
-  > div:is([class^="wrapper_"], [class^="childWrapper"]),
-  > div > div:is([class^="wrapper_"], [class^="childWrapper"]),
-  > div > div > div:is([class^="wrapper_"], [class^="childWrapper"])
-)::before{
-  content: "" !important;
+/* subtle always-on ring */
+:where([data-list-item-id^="guildsnav___"][role="treeitem"])
+:is([class^="wrapper_"], [class^="childWrapper"])::before{
+  content: "" !important; /* required for ::before to render */ /* :contentReference[oaicite:2]{index=2} */
   position: absolute !important;
   inset: 0 !important;
   border-radius: inherit !important;
   pointer-events: none !important;
 
-  background: var(--iris-gradient) !important;
+  border: var(--iris-ring-width) solid transparent !important;
+  background:
+    linear-gradient(transparent, transparent) padding-box,
+    var(--iris-gradient) border-box !important;
+
   background-size: var(--iris-size) !important;
-  background-position: 0% 50% !important;
+  background-position: 0% 50%, 0% 50% !important;
 
-  -webkit-mask: radial-gradient(
-    farthest-side,
-    transparent calc(100% - var(--iris-ring-width)),
-    #000 0
-  );
-  mask: radial-gradient(
-    farthest-side,
-    transparent calc(100% - var(--iris-ring-width)),
-    #000 0
-  );
-
-  opacity: .28 !important;
-  z-index: 2 !important;     /* <-- key change: no -1 */
+  opacity: .35 !important;
+  z-index: 10 !important;  /* IMPORTANT: no -1 */
   filter: none !important;
   animation: none !important;
 }
 
-/* Hover/selected: brighter + glow + (optional) animate */
-:where(ul[data-list-id="guildsnav"])
-:is(li, div)[data-list-item-id^="guildsnav___"]:hover
-:is(
-  > div:is([class^="wrapper_"], [class^="childWrapper"]),
-  > div > div:is([class^="wrapper_"], [class^="childWrapper"]),
-  > div > div > div:is([class^="wrapper_"], [class^="childWrapper"])
-)::before,
-:where(ul[data-list-id="guildsnav"])
-[role="treeitem"][aria-selected="true"]
-:is(
-  > div:is([class^="wrapper_"], [class^="childWrapper"]),
-  > div > div:is([class^="wrapper_"], [class^="childWrapper"]),
-  > div > div > div:is([class^="wrapper_"], [class^="childWrapper"])
-)::before{
+/* hover + selected: brighter + glow + animate */
+:where([data-list-item-id^="guildsnav___"][role="treeitem"]):hover
+:is([class^="wrapper_"], [class^="childWrapper"])::before,
+:where([data-list-item-id^="guildsnav___"][role="treeitem"][aria-selected="true"])
+:is([class^="wrapper_"], [class^="childWrapper"])::before{
   opacity: 1 !important;
   filter: drop-shadow(var(--iris-glow)) !important;
 }
 
 @media (prefers-reduced-motion: no-preference){
-  :where(ul[data-list-id="guildsnav"])
-  :is(li, div)[data-list-item-id^="guildsnav___"]:hover
-  :is(
-    > div:is([class^="wrapper_"], [class^="childWrapper"]),
-    > div > div:is([class^="wrapper_"], [class^="childWrapper"]),
-    > div > div > div:is([class^="wrapper_"], [class^="childWrapper"])
-  )::before,
-  :where(ul[data-list-id="guildsnav"])
-  [role="treeitem"][aria-selected="true"]
-  :is(
-    > div:is([class^="wrapper_"], [class^="childWrapper"]),
-    > div > div:is([class^="wrapper_"], [class^="childWrapper"]),
-    > div > div > div:is([class^="wrapper_"], [class^="childWrapper"])
-  )::before{
+  :where([data-list-item-id^="guildsnav___"][role="treeitem"]):hover
+  :is([class^="wrapper_"], [class^="childWrapper"])::before,
+  :where([data-list-item-id^="guildsnav___"][role="treeitem"][aria-selected="true"])
+  :is([class^="wrapper_"], [class^="childWrapper"])::before{
     animation: irisShift var(--iris-speed) ease infinite !important;
   }
 }
