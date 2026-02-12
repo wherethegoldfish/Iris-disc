@@ -193,30 +193,25 @@ a[data-list-item-id^="channels___"][aria-selected="true"]::before{
     animation: irisShift var(--iris-speed) ease infinite;
   }
 }
-
 /* =========================
-   5) SERVER ICON RING (HOVER + SELECTED)
+   5) SERVER ICON RING (CONSISTENT + VISIBLE)
    ========================= */
 
-/* =========================
-   5) SERVER ICON RING (CONSISTENT)
-   ========================= */
-
-/* Target common wrapper depths (Discord sometimes adds one extra div) */
-ul[data-list-id="guildsnav"] div[data-list-item-id^="guildsnav___"]
+:where(ul[data-list-id="guildsnav"])
+:is(li, div)[data-list-item-id^="guildsnav___"]
 :is(
   > div:is([class^="wrapper_"], [class^="childWrapper"]),
   > div > div:is([class^="wrapper_"], [class^="childWrapper"]),
   > div > div > div:is([class^="wrapper_"], [class^="childWrapper"])
 ){
   position: relative !important;
-  border-radius: inherit !important; /* follows circle/squircle correctly */
-  z-index: 0 !important;
-  isolation: isolate !important;     /* keeps ::before from ending up behind everything */
+  border-radius: inherit !important;
+  isolation: isolate !important;
 }
 
-/* Ring (drawn INSIDE so it can't get clipped) */
-ul[data-list-id="guildsnav"] div[data-list-item-id^="guildsnav___"]
+/* Always-visible subtle ring */
+:where(ul[data-list-id="guildsnav"])
+:is(li, div)[data-list-item-id^="guildsnav___"]
 :is(
   > div:is([class^="wrapper_"], [class^="childWrapper"]),
   > div > div:is([class^="wrapper_"], [class^="childWrapper"]),
@@ -224,8 +219,9 @@ ul[data-list-id="guildsnav"] div[data-list-item-id^="guildsnav___"]
 )::before{
   content: "" !important;
   position: absolute !important;
-  inset: 0 !important;               /* key change: no negative inset */
+  inset: 0 !important;
   border-radius: inherit !important;
+  pointer-events: none !important;
 
   background: var(--iris-gradient) !important;
   background-size: var(--iris-size) !important;
@@ -242,14 +238,22 @@ ul[data-list-id="guildsnav"] div[data-list-item-id^="guildsnav___"]
     #000 0
   );
 
-  opacity: 0.28 !important;          /* subtle idle ring */
-  z-index: -1 !important;
+  opacity: .28 !important;
+  z-index: 2 !important;     /* <-- key change: no -1 */
   filter: none !important;
   animation: none !important;
 }
 
-/* Stronger ring on hover */
-ul[data-list-id="guildsnav"] div[data-list-item-id^="guildsnav___"]:hover
+/* Hover/selected: brighter + glow + (optional) animate */
+:where(ul[data-list-id="guildsnav"])
+:is(li, div)[data-list-item-id^="guildsnav___"]:hover
+:is(
+  > div:is([class^="wrapper_"], [class^="childWrapper"]),
+  > div > div:is([class^="wrapper_"], [class^="childWrapper"]),
+  > div > div > div:is([class^="wrapper_"], [class^="childWrapper"])
+)::before,
+:where(ul[data-list-id="guildsnav"])
+[role="treeitem"][aria-selected="true"]
 :is(
   > div:is([class^="wrapper_"], [class^="childWrapper"]),
   > div > div:is([class^="wrapper_"], [class^="childWrapper"]),
@@ -260,29 +264,15 @@ ul[data-list-id="guildsnav"] div[data-list-item-id^="guildsnav___"]:hover
 }
 
 @media (prefers-reduced-motion: no-preference){
-  ul[data-list-id="guildsnav"] div[data-list-item-id^="guildsnav___"]:hover
+  :where(ul[data-list-id="guildsnav"])
+  :is(li, div)[data-list-item-id^="guildsnav___"]:hover
   :is(
     > div:is([class^="wrapper_"], [class^="childWrapper"]),
     > div > div:is([class^="wrapper_"], [class^="childWrapper"]),
     > div > div > div:is([class^="wrapper_"], [class^="childWrapper"])
-  )::before{
-    animation: irisShift var(--iris-speed) ease infinite !important;
-  }
-}
-
-/* Stronger ring when selected */
-ul[data-list-id="guildsnav"] [role="treeitem"][aria-selected="true"]
-:is(
-  > div:is([class^="wrapper_"], [class^="childWrapper"]),
-  > div > div:is([class^="wrapper_"], [class^="childWrapper"]),
-  > div > div > div:is([class^="wrapper_"], [class^="childWrapper"])
-)::before{
-  opacity: 1 !important;
-  filter: drop-shadow(var(--iris-glow)) !important;
-}
-
-@media (prefers-reduced-motion: no-preference){
-  ul[data-list-id="guildsnav"] [role="treeitem"][aria-selected="true"]
+  )::before,
+  :where(ul[data-list-id="guildsnav"])
+  [role="treeitem"][aria-selected="true"]
   :is(
     > div:is([class^="wrapper_"], [class^="childWrapper"]),
     > div > div:is([class^="wrapper_"], [class^="childWrapper"]),
