@@ -194,24 +194,45 @@ a[data-list-item-id^="channels___"][aria-selected="true"]::before{
   }
 }
 /* =========================
-   5) SERVER ICON RING (WORKS WITH YOUR DOM)
+   5) SERVER ICON RING (VERY ROBUST)
    ========================= */
 
-:where([data-list-item-id^="guildsnav___"][role="treeitem"])
-:is([class^="wrapper_"], [class^="childWrapper"]) {
-  position: relative !important;
-  border-radius: inherit !important;
+/* TUNABLES */
+:root{
+  --iris-ring-idle-opacity: 0.22;   /* always-visible strength */
+  --iris-ring-active-opacity: 1;    /* hover/selected strength */
+  --iris-server-radius: 50%;        /* 50% = circle; try 16px for squircle */
+  --iris-ring-glow: var(--iris-glow);
 }
 
-/* subtle always-on ring */
-:where([data-list-item-id^="guildsnav___"][role="treeitem"])
-:is([class^="wrapper_"], [class^="childWrapper"])::before{
-  content: "" !important; /* required for ::before to render */ /* :contentReference[oaicite:2]{index=2} */
+/* --- Target the clickable 40x40 node (your build) --- */
+:where(ul[data-list-id="guildsnav"])
+:where([role="treeitem"][data-list-item-id^="guildsnav___"]){
+  position: relative !important;
+  isolation: isolate !important;
+  border-radius: var(--iris-server-radius) !important;
+}
+
+/* --- Fallback: if Discord puts guildsnav___ on a parent, still hit the treeitem inside --- */
+:where(ul[data-list-id="guildsnav"])
+:where(li[data-list-item-id^="guildsnav___"] [role="treeitem"]){
+  position: relative !important;
+  isolation: isolate !important;
+  border-radius: var(--iris-server-radius) !important;
+}
+
+/* --- The ring (idle) --- */
+:where(ul[data-list-id="guildsnav"])
+:where([role="treeitem"][data-list-item-id^="guildsnav___"])::before,
+:where(ul[data-list-id="guildsnav"])
+:where(li[data-list-item-id^="guildsnav___"] [role="treeitem"])::before{
+  content: "" !important;
   position: absolute !important;
-  inset: 0 !important;
+  inset: 0 !important;                 /* draw INSIDE so it can’t get clipped */
   border-radius: inherit !important;
   pointer-events: none !important;
 
+  /* Gradient border technique */
   border: var(--iris-ring-width) solid transparent !important;
   background:
     linear-gradient(transparent, transparent) padding-box,
@@ -220,29 +241,40 @@ a[data-list-item-id^="channels___"][aria-selected="true"]::before{
   background-size: var(--iris-size) !important;
   background-position: 0% 50%, 0% 50% !important;
 
-  opacity: .35 !important;
-  z-index: 10 !important;  /* IMPORTANT: no -1 */
+  opacity: var(--iris-ring-idle-opacity) !important;
+  z-index: 5 !important;              /* visible (no negative z-index) */
   filter: none !important;
   animation: none !important;
 }
 
-/* hover + selected: brighter + glow + animate */
-:where([data-list-item-id^="guildsnav___"][role="treeitem"]):hover
-:is([class^="wrapper_"], [class^="childWrapper"])::before,
-:where([data-list-item-id^="guildsnav___"][role="treeitem"][aria-selected="true"])
-:is([class^="wrapper_"], [class^="childWrapper"])::before{
-  opacity: 1 !important;
-  filter: drop-shadow(var(--iris-glow)) !important;
+/* --- Hover + selected (strong) --- */
+:where(ul[data-list-id="guildsnav"])
+:where([role="treeitem"][data-list-item-id^="guildsnav___"]:hover,
+       [role="treeitem"][data-list-item-id^="guildsnav___"][aria-selected="true"])::before,
+:where(ul[data-list-id="guildsnav"])
+:where(li[data-list-item-id^="guildsnav___"] [role="treeitem"]:hover,
+       li[data-list-item-id^="guildsnav___"] [role="treeitem"][aria-selected="true"])::before{
+  opacity: var(--iris-ring-active-opacity) !important;
+  filter: drop-shadow(var(--iris-ring-glow)) !important;
 }
 
 @media (prefers-reduced-motion: no-preference){
-  :where([data-list-item-id^="guildsnav___"][role="treeitem"]):hover
-  :is([class^="wrapper_"], [class^="childWrapper"])::before,
-  :where([data-list-item-id^="guildsnav___"][role="treeitem"][aria-selected="true"])
-  :is([class^="wrapper_"], [class^="childWrapper"])::before{
+  :where(ul[data-list-id="guildsnav"])
+  :where([role="treeitem"][data-list-item-id^="guildsnav___"]:hover,
+         [role="treeitem"][data-list-item-id^="guildsnav___"][aria-selected="true"])::before,
+  :where(ul[data-list-id="guildsnav"])
+  :where(li[data-list-item-id^="guildsnav___"] [role="treeitem"]:hover,
+         li[data-list-item-id^="guildsnav___"] [role="treeitem"][aria-selected="true"])::before{
     animation: irisShift var(--iris-speed) ease infinite !important;
   }
 }
+
+/* --- OPTIONAL: don’t ring “Add Server” / “Explore” buttons (uncomment if you want) --- */
+/*
+:where([data-list-item-id*="create"], [data-list-item-id*="discover"]){
+  --iris-ring-idle-opacity: 0 !important;
+}
+*/
 
 /* =========================
    6) SERVER “PILL” INDICATOR (LEFT BAR)
