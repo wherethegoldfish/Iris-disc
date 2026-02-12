@@ -198,27 +198,39 @@ a[data-list-item-id^="channels___"][aria-selected="true"]::before{
    5) SERVER ICON RING (HOVER + SELECTED)
    ========================= */
 
-/* Make the icon wrapper a positioning context */
+/* =========================
+   5) SERVER ICON RING (CONSISTENT)
+   ========================= */
+
+/* Target common wrapper depths (Discord sometimes adds one extra div) */
 ul[data-list-id="guildsnav"] div[data-list-item-id^="guildsnav___"]
-> div:is([class^="wrapper_"], [class^="childWrapper"]){
+:is(
+  > div:is([class^="wrapper_"], [class^="childWrapper"]),
+  > div > div:is([class^="wrapper_"], [class^="childWrapper"]),
+  > div > div > div:is([class^="wrapper_"], [class^="childWrapper"])
+){
   position: relative !important;
-  border-radius: 50% !important;
+  border-radius: inherit !important; /* follows circle/squircle correctly */
   z-index: 0 !important;
+  isolation: isolate !important;     /* keeps ::before from ending up behind everything */
 }
 
-/* Ring drawn as a masked gradient “stroke” */
+/* Ring (drawn INSIDE so it can't get clipped) */
 ul[data-list-id="guildsnav"] div[data-list-item-id^="guildsnav___"]
-> div:is([class^="wrapper_"], [class^="childWrapper"])::before{
+:is(
+  > div:is([class^="wrapper_"], [class^="childWrapper"]),
+  > div > div:is([class^="wrapper_"], [class^="childWrapper"]),
+  > div > div > div:is([class^="wrapper_"], [class^="childWrapper"])
+)::before{
   content: "" !important;
   position: absolute !important;
-  inset: calc(-1 * var(--iris-ring-width)) !important;
-  border-radius: 50% !important;
+  inset: 0 !important;               /* key change: no negative inset */
+  border-radius: inherit !important;
 
   background: var(--iris-gradient) !important;
   background-size: var(--iris-size) !important;
   background-position: 0% 50% !important;
 
-  /* Create a ring (hole in the middle) */
   -webkit-mask: radial-gradient(
     farthest-side,
     transparent calc(100% - var(--iris-ring-width)),
@@ -230,28 +242,54 @@ ul[data-list-id="guildsnav"] div[data-list-item-id^="guildsnav___"]
     #000 0
   );
 
-  opacity: 0 !important;
+  opacity: 0.28 !important;          /* subtle idle ring */
   z-index: -1 !important;
+  filter: none !important;
+  animation: none !important;
+}
+
+/* Stronger ring on hover */
+ul[data-list-id="guildsnav"] div[data-list-item-id^="guildsnav___"]:hover
+:is(
+  > div:is([class^="wrapper_"], [class^="childWrapper"]),
+  > div > div:is([class^="wrapper_"], [class^="childWrapper"]),
+  > div > div > div:is([class^="wrapper_"], [class^="childWrapper"])
+)::before{
+  opacity: 1 !important;
   filter: drop-shadow(var(--iris-glow)) !important;
 }
 
 @media (prefers-reduced-motion: no-preference){
-  ul[data-list-id="guildsnav"] div[data-list-item-id^="guildsnav___"]
-  > div:is([class^="wrapper_"], [class^="childWrapper"])::before{
+  ul[data-list-id="guildsnav"] div[data-list-item-id^="guildsnav___"]:hover
+  :is(
+    > div:is([class^="wrapper_"], [class^="childWrapper"]),
+    > div > div:is([class^="wrapper_"], [class^="childWrapper"]),
+    > div > div > div:is([class^="wrapper_"], [class^="childWrapper"])
+  )::before{
     animation: irisShift var(--iris-speed) ease infinite !important;
   }
 }
 
-/* Show ring on hover */
-ul[data-list-id="guildsnav"] div[data-list-item-id^="guildsnav___"]:hover
-> div:is([class^="wrapper_"], [class^="childWrapper"])::before{
+/* Stronger ring when selected */
+ul[data-list-id="guildsnav"] [role="treeitem"][aria-selected="true"]
+:is(
+  > div:is([class^="wrapper_"], [class^="childWrapper"]),
+  > div > div:is([class^="wrapper_"], [class^="childWrapper"]),
+  > div > div > div:is([class^="wrapper_"], [class^="childWrapper"])
+)::before{
   opacity: 1 !important;
+  filter: drop-shadow(var(--iris-glow)) !important;
 }
 
-/* Show ring when selected */
-ul[data-list-id="guildsnav"] [role="treeitem"][aria-selected="true"]
-> div:is([class^="wrapper_"], [class^="childWrapper"])::before{
-  opacity: 1 !important;
+@media (prefers-reduced-motion: no-preference){
+  ul[data-list-id="guildsnav"] [role="treeitem"][aria-selected="true"]
+  :is(
+    > div:is([class^="wrapper_"], [class^="childWrapper"]),
+    > div > div:is([class^="wrapper_"], [class^="childWrapper"]),
+    > div > div > div:is([class^="wrapper_"], [class^="childWrapper"])
+  )::before{
+    animation: irisShift var(--iris-speed) ease infinite !important;
+  }
 }
 
 /* =========================
