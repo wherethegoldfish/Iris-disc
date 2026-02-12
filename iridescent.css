@@ -1,29 +1,34 @@
-/* iridescent.css
-   Drop-in iridescent accent module for BetterDiscord/ClearVision.
+/* iridescent.css — Clean “effects layer” for BetterDiscord/ClearVision
+   Keep this file focused on effects; keep ClearVision variables in your theme.
 */
 
 /* =========================
-   1) CUSTOMIZE YOUR IRIS
+   1) IRIS CONFIG
    ========================= */
 :root{
-  /* Color stops (purple/pink iridescence) */
-  --iris-c1: #580ce6; /* deep purple */
-  --iris-c2: #7a2cff; /* violet */
-  --iris-c3: #b8186d; /* magenta */
-  --iris-c4: #ff4fd8; /* hot pink */
-  --iris-c5: #580ce6; /* loop back */
+  /* Pull from ClearVision if present */
+  --iris-c1: var(--main-color, #580ce6);
+  --iris-c2: #7a2cff;
+  --iris-c3: var(--main-personal-color, #b8186d);
+  --iris-c4: #ff4fd8;
+  --iris-c5: var(--main-color, #580ce6);
 
-  /* Animation / sizing */
   --iris-angle: 135deg;
-  --iris-size: 320% 320%;
+  --iris-size: 340% 340%;
   --iris-speed: 9s;
 
-  /* Border + glow */
+  --iris-text: #fff;
+
+  /* Buttons */
   --iris-border-width: 2px;
   --iris-glow: 0 0 14px rgba(88, 12, 230, 0.35);
 
-  /* Text on top of gradient */
-  --iris-text: #fff;
+  /* Sheen (optional) */
+  --iris-shine-opacity: 0.20;
+  --iris-shine-speed: 2.6s;
+
+  /* Server ring */
+  --iris-ring-width: 3px;
 }
 
 :root{
@@ -36,25 +41,34 @@
   );
 }
 
-/* Smooth animated “sheen” */
+/* =========================
+   2) ANIMATION (ONCE)
+   ========================= */
 @keyframes irisShift {
   0%   { background-position: 0% 50%; }
   50%  { background-position: 100% 50%; }
   100% { background-position: 0% 50%; }
 }
 
-/* Respect reduced motion */
+@keyframes irisSheen {
+  0%   { transform: translateX(-140%) rotate(12deg); opacity: 0; }
+  15%  { opacity: var(--iris-shine-opacity); }
+  50%  { opacity: var(--iris-shine-opacity); }
+  85%  { opacity: 0; }
+  100% { transform: translateX(140%) rotate(12deg); opacity: 0; }
+}
+
+/* Reduced motion: keep the look, remove motion */
 @media (prefers-reduced-motion: reduce){
-  * { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; }
+  * { animation: none !important; transition: none !important; }
 }
 
 /* =========================
-   2) BUTTONS (FILLED + OUTLINE)
-   Uses stable-ish “lookFilled/lookOutlined” substrings Discord ships in classnames.
+   3) BUTTONS (FILLED + OUTLINED)
    ========================= */
-
-/* Filled buttons */
-:is(button,[role="button"])[class*="lookFilled"]{
+:where(button,[role="button"])[class*="lookFilled"]{
+  position: relative !important;
+  overflow: hidden !important;
   background: var(--iris-gradient) !important;
   background-size: var(--iris-size) !important;
   background-position: 0% 50% !important;
@@ -62,8 +76,8 @@
   box-shadow: var(--iris-glow) !important;
 }
 
-/* Outlined buttons (gradient border, transparent inside) */
-:is(button,[role="button"])[class*="lookOutlined"]{
+:where(button,[role="button"])[class*="lookOutlined"]{
+  position: relative !important;
   border: var(--iris-border-width) solid transparent !important;
   background:
     linear-gradient(transparent, transparent) padding-box,
@@ -74,42 +88,69 @@
   box-shadow: var(--iris-glow) !important;
 }
 
-/* Animate buttons (only if user allows motion) */
+/* Animate only if user allows motion */
 @media (prefers-reduced-motion: no-preference){
-  :is(button,[role="button"])[class*="lookFilled"],
-  :is(button,[role="button"])[class*="lookOutlined"]{
+  :where(button,[role="button"])[class*="lookFilled"],
+  :where(button,[role="button"])[class*="lookOutlined"]{
     animation: irisShift var(--iris-speed) ease infinite !important;
   }
 }
 
-/* Hover polish */
-:is(button,[role="button"])[class*="lookFilled"]:hover,
-:is(button,[role="button"])[class*="lookOutlined"]:hover{
-  filter: saturate(1.15) brightness(1.05);
+/* Optional sheen on filled buttons (subtle gloss sweep) */
+:where(button,[role="button"])[class*="lookFilled"]::after{
+  content: "" !important;
+  position: absolute !important;
+  inset: -40% -60% !important;
+  pointer-events: none !important;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(255,255,255,0.0) 35%,
+    rgba(255,255,255,0.55) 50%,
+    rgba(255,255,255,0.0) 65%,
+    transparent 100%
+  ) !important;
+  mix-blend-mode: screen !important;
+  opacity: 0;
 }
 
-/* Keyboard focus ring (solid fallback; gradients can’t be used directly as outline-color) */
-:is(button,[role="button"]):focus-visible{
+@media (prefers-reduced-motion: no-preference){
+  :where(button,[role="button"])[class*="lookFilled"]::after{
+    opacity: 1;
+    animation: irisSheen var(--iris-shine-speed) linear infinite !important;
+  }
+}
+
+/* Hover polish */
+:where(button,[role="button"])[class*="lookFilled"]:hover,
+:where(button,[role="button"])[class*="lookOutlined"]:hover{
+  filter: saturate(1.12) brightness(1.05);
+}
+
+/* Keyboard focus ring (solid fallback) */
+:where(button,[role="button"]):focus-visible{
   outline: 2px solid var(--iris-c2) !important;
-  outline-offset: 2px;
+  outline-offset: 2px !important;
 }
 
 /* =========================
-   3) SELECTED CHANNEL / SELECTED TAB ACCENTS
-   Uses aria-selected for “selected” state. :contentReference[oaicite:2]{index=2}
-   Uses Discord’s data-list-item-id convention for channels. :contentReference[oaicite:3]{index=3}
+   4) SELECTED CHANNEL + SELECTED TABS
    ========================= */
 
-/* Selected channel: add an iridescent left bar + subtle background */
+/* Background fallback for builds without color-mix() */
 a[data-list-item-id^="channels___"][aria-selected="true"]{
   position: relative;
-  background:
-    linear-gradient(rgba(0,0,0,0.0), rgba(0,0,0,0.0)) padding-box,
-    color-mix(in srgb, var(--iris-c1) 18%, transparent) border-box !important;
   border-radius: 8px;
+  background-color: rgba(88, 12, 230, 0.12);
 }
 
-/* The “bar” */
+/* Prefer color-mix when supported (prettier + theme-aware) */
+@supports (background-color: color-mix(in srgb, red 20%, transparent)){
+  a[data-list-item-id^="channels___"][aria-selected="true"]{
+    background-color: color-mix(in srgb, var(--iris-c1) 18%, transparent);
+  }
+}
+
+/* The iridescent left bar */
 a[data-list-item-id^="channels___"][aria-selected="true"]::before{
   content: "";
   position: absolute;
@@ -123,14 +164,13 @@ a[data-list-item-id^="channels___"][aria-selected="true"]::before{
   background-position: 0% 50%;
 }
 
-/* Animate the bar */
 @media (prefers-reduced-motion: no-preference){
   a[data-list-item-id^="channels___"][aria-selected="true"]::before{
     animation: irisShift var(--iris-speed) ease infinite;
   }
 }
 
-/* Selected tab (many Discord tab UIs use role="tab") */
+/* Selected tabs (common Discord pattern) */
 [role="tab"][aria-selected="true"]{
   position: relative;
 }
@@ -155,9 +195,82 @@ a[data-list-item-id^="channels___"][aria-selected="true"]::before{
 }
 
 /* =========================
-   4) OPTIONAL: “Danger” OUTLINE BORDER TOKENS → YOUR IRIS COLORS
-   (These are Discord CSS vars BetterDiscord documents.) :contentReference[oaicite:4]{index=4}
-   NOTE: these expect colors, not gradients — so we map to iris stops.
+   5) SERVER ICON RING (HOVER + SELECTED)
+   ========================= */
+
+/* Make the icon wrapper a positioning context */
+ul[data-list-id="guildsnav"] div[data-list-item-id^="guildsnav___"]
+> div:is([class^="wrapper_"], [class^="childWrapper"]){
+  position: relative !important;
+  border-radius: 50% !important;
+  z-index: 0 !important;
+}
+
+/* Ring drawn as a masked gradient “stroke” */
+ul[data-list-id="guildsnav"] div[data-list-item-id^="guildsnav___"]
+> div:is([class^="wrapper_"], [class^="childWrapper"])::before{
+  content: "" !important;
+  position: absolute !important;
+  inset: calc(-1 * var(--iris-ring-width)) !important;
+  border-radius: 50% !important;
+
+  background: var(--iris-gradient) !important;
+  background-size: var(--iris-size) !important;
+  background-position: 0% 50% !important;
+
+  /* Create a ring (hole in the middle) */
+  -webkit-mask: radial-gradient(
+    farthest-side,
+    transparent calc(100% - var(--iris-ring-width)),
+    #000 0
+  );
+  mask: radial-gradient(
+    farthest-side,
+    transparent calc(100% - var(--iris-ring-width)),
+    #000 0
+  );
+
+  opacity: 0 !important;
+  z-index: -1 !important;
+  filter: drop-shadow(var(--iris-glow)) !important;
+}
+
+@media (prefers-reduced-motion: no-preference){
+  ul[data-list-id="guildsnav"] div[data-list-item-id^="guildsnav___"]
+  > div:is([class^="wrapper_"], [class^="childWrapper"])::before{
+    animation: irisShift var(--iris-speed) ease infinite !important;
+  }
+}
+
+/* Show ring on hover */
+ul[data-list-id="guildsnav"] div[data-list-item-id^="guildsnav___"]:hover
+> div:is([class^="wrapper_"], [class^="childWrapper"])::before{
+  opacity: 1 !important;
+}
+
+/* Show ring when selected */
+ul[data-list-id="guildsnav"] [role="treeitem"][aria-selected="true"]
+> div:is([class^="wrapper_"], [class^="childWrapper"])::before{
+  opacity: 1 !important;
+}
+
+/* =========================
+   6) SERVER “PILL” INDICATOR (LEFT BAR)
+   ========================= */
+ul[data-list-id="guildsnav"] [class*="pill"] [class*="item"]{
+  background: var(--iris-gradient) !important;
+  background-size: var(--iris-size) !important;
+  background-position: 0% 50% !important;
+}
+
+@media (prefers-reduced-motion: no-preference){
+  ul[data-list-id="guildsnav"] [class*="pill"] [class*="item"]{
+    animation: irisShift var(--iris-speed) ease infinite !important;
+  }
+}
+
+/* =========================
+   7) OPTIONAL: “DANGER OUTLINE” BORDER TOKENS → IRIS STOPS
    ========================= */
 :root{
   --button-outline-danger-border: var(--iris-c2);
