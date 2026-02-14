@@ -1,5 +1,5 @@
 /* iridescent.css — Clean “effects layer” for BetterDiscord/ClearVision
-   Focused on effects; keep ClearVision variables in your main theme.
+   Keep this file focused on effects; keep ClearVision variables in your theme.
 */
 
 /* =========================
@@ -26,6 +26,9 @@
   /* Sheen (optional) */
   --iris-shine-opacity: 0.20;
   --iris-shine-speed: 2.6s;
+
+  /* Server ring */
+  --iris-ring-width: 3px;
 }
 
 :root{
@@ -192,8 +195,67 @@ a[data-list-item-id^="channels___"][aria-selected="true"]::before{
 }
 
 /* =========================
-   5) SERVER “PILL” INDICATOR (LEFT BAR)
-   (NOT a ring — just the left selection/unread pill)
+   5) SERVER ICON RING (HOVER + SELECTED)
+   ========================= */
+
+/* Make the icon wrapper a positioning context */
+ul[data-list-id="guildsnav"] div[data-list-item-id^="guildsnav___"]
+> div:is([class^="wrapper_"], [class^="childWrapper"]){
+  position: relative !important;
+  border-radius: 50% !important;
+  z-index: 0 !important;
+}
+
+/* Ring drawn as a masked gradient “stroke” */
+ul[data-list-id="guildsnav"] div[data-list-item-id^="guildsnav___"]
+> div:is([class^="wrapper_"], [class^="childWrapper"])::before{
+  content: "" !important;
+  position: absolute !important;
+  inset: calc(-1 * var(--iris-ring-width)) !important;
+  border-radius: 50% !important;
+
+  background: var(--iris-gradient) !important;
+  background-size: var(--iris-size) !important;
+  background-position: 0% 50% !important;
+
+  /* Create a ring (hole in the middle) */
+  -webkit-mask: radial-gradient(
+    farthest-side,
+    transparent calc(100% - var(--iris-ring-width)),
+    #000 0
+  );
+  mask: radial-gradient(
+    farthest-side,
+    transparent calc(100% - var(--iris-ring-width)),
+    #000 0
+  );
+
+  opacity: 0 !important;
+  z-index: -1 !important;
+  filter: drop-shadow(var(--iris-glow)) !important;
+}
+
+@media (prefers-reduced-motion: no-preference){
+  ul[data-list-id="guildsnav"] div[data-list-item-id^="guildsnav___"]
+  > div:is([class^="wrapper_"], [class^="childWrapper"])::before{
+    animation: irisShift var(--iris-speed) ease infinite !important;
+  }
+}
+
+/* Show ring on hover */
+ul[data-list-id="guildsnav"] div[data-list-item-id^="guildsnav___"]:hover
+> div:is([class^="wrapper_"], [class^="childWrapper"])::before{
+  opacity: 1 !important;
+}
+
+/* Show ring when selected */
+ul[data-list-id="guildsnav"] [role="treeitem"][aria-selected="true"]
+> div:is([class^="wrapper_"], [class^="childWrapper"])::before{
+  opacity: 1 !important;
+}
+
+/* =========================
+   6) SERVER “PILL” INDICATOR (LEFT BAR)
    ========================= */
 ul[data-list-id="guildsnav"] [class*="pill"] [class*="item"]{
   background: var(--iris-gradient) !important;
@@ -208,7 +270,7 @@ ul[data-list-id="guildsnav"] [class*="pill"] [class*="item"]{
 }
 
 /* =========================
-   6) OPTIONAL: “DANGER OUTLINE” BORDER TOKENS → IRIS STOPS
+   7) OPTIONAL: “DANGER OUTLINE” BORDER TOKENS → IRIS STOPS
    ========================= */
 :root{
   --button-outline-danger-border: var(--iris-c2);
